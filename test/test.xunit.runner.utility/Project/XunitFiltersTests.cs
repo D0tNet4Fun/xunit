@@ -219,6 +219,66 @@ public class XunitFiltersTests
             Assert.True(filters.Filter(method3));
         }
     }
+
+    public static class IncludedNameSpaces
+    {
+        [Fact]
+        public static void CanFilterFactsByNameSpace()
+        {
+            var filters = new XunitFilters();
+            var method11 = Mocks.TestCase<Namespace1.ClassInNamespace1.InnerClass1>("Name1");
+            var method21 = Mocks.TestCase<Namespace2.ClassInNamespace2.InnerClass1>("Name1");
+            filters.IncludedNameSpaces.Add("Namespace1");
+
+            Assert.True(filters.Filter(method11));
+            Assert.False(filters.Filter(method21));
+        }
+
+        [Fact]
+        public static void MultipleFiltersAreAnOrOperation()
+        {
+            var filters = new XunitFilters();
+            var method11 = Mocks.TestCase<Namespace1.ClassInNamespace1.InnerClass1>("Name1");
+            var method21 = Mocks.TestCase<Namespace2.ClassInNamespace2.InnerClass1>("Name1");
+            var method31 = Mocks.TestCase<Namespace3.ClassInNamespace3.InnerClass1>("Name1");
+            filters.IncludedNameSpaces.Add("Namespace1");
+            filters.IncludedNameSpaces.Add("Namespace2");
+
+            Assert.True(filters.Filter(method11));
+            Assert.True(filters.Filter(method21));
+            Assert.False(filters.Filter(method31));
+        }
+    }
+
+    public static class ExcludedNameSpaces
+    {
+        [Fact]
+        public static void CanFilterFactsByNameSpace()
+        {
+            var filters = new XunitFilters();
+            var method11 = Mocks.TestCase<Namespace1.ClassInNamespace1.InnerClass1>("Name1");
+            var method21 = Mocks.TestCase<Namespace2.ClassInNamespace2.InnerClass1>("Name1");
+            filters.ExcludedNameSpaces.Add("Namespace1");
+
+            Assert.False(filters.Filter(method11));
+            Assert.True(filters.Filter(method21));
+        }
+
+        [Fact]
+        public static void MultipleFiltersAreAnAndOperation()
+        {
+            var filters = new XunitFilters();
+            var method11 = Mocks.TestCase<Namespace1.ClassInNamespace1.InnerClass1>("Name1");
+            var method21 = Mocks.TestCase<Namespace2.ClassInNamespace2.InnerClass1>("Name1");
+            var method31 = Mocks.TestCase<Namespace3.ClassInNamespace3.InnerClass1>("Name1");
+            filters.ExcludedNameSpaces.Add("Namespace1");
+            filters.ExcludedNameSpaces.Add("Namespace2");
+
+            Assert.False(filters.Filter(method11));
+            Assert.False(filters.Filter(method21));
+            Assert.True(filters.Filter(method31));
+        }
+    }
 }
 
 namespace Namespace1
@@ -241,6 +301,30 @@ namespace Namespace1
         {
             [Fact]
             public static void Name3() { }
+        }
+    }
+}
+
+namespace Namespace2
+{
+    public class ClassInNamespace2
+    {
+        public class InnerClass1
+        {
+            [Fact]
+            public static void Name1() { }
+        }
+    }
+}
+
+namespace Namespace3
+{
+    public class ClassInNamespace3
+    {
+        public class InnerClass1
+        {
+            [Fact]
+            public static void Name1() { }
         }
     }
 }

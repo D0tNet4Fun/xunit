@@ -280,6 +280,13 @@ namespace Xunit.ConsoleClient
 
                     project.Filters.IncludedNameSpaces.Add(option.Value);
                 }
+                else if (optionName == "nonamespace")
+                {
+                    if (option.Value == null)
+                        throw new ArgumentException("missing argument for -nonamespace");
+
+                    project.Filters.ExcludedNameSpaces.Add(option.Value);
+                }
                 else
                 {
                     // Might be a reporter...

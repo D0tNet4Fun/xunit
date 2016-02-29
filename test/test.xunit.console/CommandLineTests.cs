@@ -775,6 +775,110 @@ public class CommandLineTests
         }
     }
 
+    public class NameSpaceOption
+    {
+        [Fact]
+        public static void ArgumentNotPassed()
+        {
+            var arguments = new[] { "assemblyName.dll" };
+
+            var commandLine = TestableCommandLine.Parse(arguments);
+
+            Assert.Equal(0, commandLine.Project.Filters.IncludedNameSpaces.Count);
+        }
+
+        [Fact]
+        public static void SingleValidArgument()
+        {
+            const string name = "Namespace";
+
+            var arguments = new[] { "assemblyName.dll", "-namespace", name };
+
+            var commandLine = TestableCommandLine.Parse(arguments);
+
+            Assert.Equal(1, commandLine.Project.Filters.IncludedNameSpaces.Count);
+            Assert.True(commandLine.Project.Filters.IncludedNameSpaces.Contains(name));
+        }
+
+        [Fact]
+        public static void MultipleValidArguments()
+        {
+            const string name1 = "Namespace.Inner1";
+            const string name2 = "Namespace.Inner2";
+
+            var arguments = new[] { "assemblyName.dll", "-namespace", name1, "-namespace", name2 };
+
+            var commandLine = TestableCommandLine.Parse(arguments);
+
+            Assert.Equal(2, commandLine.Project.Filters.IncludedNameSpaces.Count);
+            Assert.True(commandLine.Project.Filters.IncludedNameSpaces.Contains(name1));
+            Assert.True(commandLine.Project.Filters.IncludedNameSpaces.Contains(name2));
+        }
+
+        [Fact]
+        public static void MissingOptionValue()
+        {
+            var arguments = new[] { "assemblyName.dll", "-namespace" };
+
+            var ex = Record.Exception(() => TestableCommandLine.Parse(arguments));
+
+            Assert.IsType<ArgumentException>(ex);
+            Assert.Equal("missing argument for -namespace", ex.Message);
+        }
+    }
+
+    public class NoNameSpaceOption
+    {
+        [Fact]
+        public static void ArgumentNotPassed()
+        {
+            var arguments = new[] { "assemblyName.dll" };
+
+            var commandLine = TestableCommandLine.Parse(arguments);
+
+            Assert.Equal(0, commandLine.Project.Filters.ExcludedNameSpaces.Count);
+        }
+
+        [Fact]
+        public static void SingleValidArgument()
+        {
+            const string name = "Namespace";
+
+            var arguments = new[] { "assemblyName.dll", "-nonamespace", name };
+
+            var commandLine = TestableCommandLine.Parse(arguments);
+
+            Assert.Equal(1, commandLine.Project.Filters.ExcludedNameSpaces.Count);
+            Assert.True(commandLine.Project.Filters.ExcludedNameSpaces.Contains(name));
+        }
+
+        [Fact]
+        public static void MultipleValidArguments()
+        {
+            const string name1 = "Namespace.Inner1";
+            const string name2 = "Namespace.Inner2";
+
+            var arguments = new[] { "assemblyName.dll", "-nonamespace", name1, "-nonamespace", name2 };
+
+            var commandLine = TestableCommandLine.Parse(arguments);
+
+            Assert.Equal(2, commandLine.Project.Filters.ExcludedNameSpaces.Count);
+            Assert.True(commandLine.Project.Filters.ExcludedNameSpaces.Contains(name1));
+            Assert.True(commandLine.Project.Filters.ExcludedNameSpaces.Contains(name2));
+        }
+
+        [Fact]
+        public static void MissingOptionValue()
+        {
+            var arguments = new[] { "assemblyName.dll", "-nonamespace" };
+
+            var ex = Record.Exception(() => TestableCommandLine.Parse(arguments));
+
+            Assert.IsType<ArgumentException>(ex);
+            Assert.Equal("missing argument for -nonamespace", ex.Message);
+        }
+    }
+
     class TestableCommandLine : CommandLine
     {
         private TestableCommandLine(IReadOnlyList<IRunnerReporter> reporters, params string[] arguments)

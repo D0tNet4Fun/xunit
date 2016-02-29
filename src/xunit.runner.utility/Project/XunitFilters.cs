@@ -20,6 +20,7 @@ namespace Xunit
             IncludedClasses = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             IncludedMethods = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             IncludedNameSpaces = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            ExcludedNameSpaces = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -48,6 +49,11 @@ namespace Xunit
         public HashSet<string> IncludedNameSpaces { get; }
 
         /// <summary>
+        /// Gets the set of assembly filters for tests to exclude.
+        /// </summary>
+        public HashSet<string> ExcludedNameSpaces { get; }
+
+        /// <summary>
         /// Filters the given method using the defined filter values.
         /// </summary>
         /// <param name="testCase">The test case to filter.</param>
@@ -62,6 +68,8 @@ namespace Xunit
                 return false;
             if (!FilterIncludedNameSpaces(testCase))
                 return false;
+            if (!FilterExcludedNameSpaces(testCase))
+                return false;
 
             return true;
         }
@@ -72,10 +80,24 @@ namespace Xunit
             if (IncludedNameSpaces.Count == 0)
                 return true;
 
-            if (IncludedNameSpaces.Count != 0 && IncludedNameSpaces.Any(a => testCase.TestMethod.TestClass.Class.Name.StartsWith($"{a}.", StringComparison.Ordinal)))
+            if (IncludedNameSpaces.Any(a => testCase.TestMethod.TestClass.Class.Name.StartsWith($"{a}.", StringComparison.Ordinal)))
                 return true;
 
             return false;
+        }
+
+        bool FilterExcludedNameSpaces(ITestCase testCase)
+        {
+            // No assemblies in the filter == everything is okay
+            if (ExcludedNameSpaces.Count == 0)
+                return true;
+
+            if (ExcludedNameSpaces.Any(a => testCase.TestMethod.TestClass.Class.Name.StartsWith($"{a}.", StringComparison.Ordinal)))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         bool FilterIncludedMethodsAndClasses(ITestCase testCase)
